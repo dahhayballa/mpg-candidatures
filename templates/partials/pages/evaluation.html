@@ -1,0 +1,72 @@
+<!-- ══════════ PAGE ÉVALUATION ══════════ -->
+<div class="page" id="page-evaluation">
+  <div class="eval-empty" id="eval-empty">
+    <div class="big-icon">⭐</div>
+    <p style="font-weight:600;margin-bottom:.5rem" data-i18n="eval_select_title">Sélectionner un candidat</p>
+    <p style="font-size:.8rem" data-i18n="eval_select_sub">Allez dans la page Candidats et cliquez sur une ligne pour commencer l'évaluation.</p>
+    <button class="btn btn-gold" style="margin-top:1rem" onclick="gotoPage('candidats')" data-i18n="eval_go_candidats">Voir les candidats →</button>
+  </div>
+  <div class="eval-layout" id="eval-layout" style="display:none">
+    <!-- Colonne gauche : infos -->
+    <div>
+      <div class="cand-info-card">
+        <div class="cand-avatar" id="ev-avatar">?</div>
+        <div class="cand-name" id="ev-name">—</div>
+        <div class="cand-email" id="ev-email">—</div>
+        <div id="ev-info-rows"></div>
+        <div class="docs-grid" id="ev-docs"></div>
+      </div>
+    </div>
+    <!-- Colonne droite : grille -->
+    <div>
+      <div class="scoring-card">
+        <div class="scoring-title" data-i18n="scoring_grid">Grille d'évaluation — /100 points</div>
+        <div class="criterion">
+          <div class="crit-hd"><span class="crit-name" data-i18n="crit_niveau">Niveau d'études</span><span class="crit-cap">/25</span></div>
+          <div class="crit-desc" data-i18n="crit_niveau_desc">Correspondance avec la filière, niveau minimum requis, pertinence</div>
+          <div class="crit-row"><input type="range" class="slider" id="sl-niveau" min="0" max="25" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-niveau">0</span></div>
+        </div>
+        <div class="criterion">
+          <div class="crit-hd"><span class="crit-name" data-i18n="crit_exp">Expérience</span><span class="crit-cap">/20</span></div>
+          <div class="crit-desc" data-i18n="crit_exp_desc">Stages, expériences professionnelles ou pratiques liées au domaine</div>
+          <div class="crit-row"><input type="range" class="slider" id="sl-experience" min="0" max="20" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-experience">0</span></div>
+        </div>
+        <div class="criterion">
+          <div class="crit-hd"><span class="crit-name" data-i18n="crit_motiv">Lettre de motivation</span><span class="crit-cap">/20</span></div>
+          <div class="crit-desc" data-i18n="crit_motiv_desc">Clarté, cohérence, motivation réelle, projet professionnel</div>
+          <div class="crit-row"><input type="range" class="slider" id="sl-motivation" min="0" max="20" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-motivation">0</span></div>
+        </div>
+        <div class="criterion">
+          <div class="crit-hd"><span class="crit-name" data-i18n="crit_adeq">Adéquation au profil</span><span class="crit-cap">/20</span></div>
+          <div class="crit-desc" data-i18n="crit_adeq_desc">Compatibilité avec la formation, aptitudes techniques, logique</div>
+          <div class="crit-row"><input type="range" class="slider" id="sl-adequation" min="0" max="20" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-adequation">0</span></div>
+        </div>
+        <div class="criterion">
+          <div class="crit-hd"><span class="crit-name" data-i18n="crit_dossier">Qualité du dossier</span><span class="crit-cap">/10</span><span class="crit-auto-tag">⚡ Auto</span></div>
+          <div class="crit-desc" data-i18n="crit_dossier_desc">CV (2.5) + Lettre motivation (2.5) + CIN (2.5) + Diplômes (2.5)</div>
+          <div class="crit-row"><input type="range" class="slider" id="sl-dossier" min="0" max="10" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-dossier">0</span></div>
+        </div>
+        <div class="criterion">
+          <div class="crit-hd"><span class="crit-name" data-i18n="crit_dispo">Disponibilité</span><span class="crit-cap">/5</span></div>
+          <div class="crit-desc" data-i18n="crit_dispo_desc">Capacité à suivre toute la formation (3 à 6 mois, temps plein)</div>
+          <div class="crit-row"><input type="range" class="slider" id="sl-disponibilite" min="0" max="5" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-disponibilite">0</span></div>
+        </div>
+
+        <div class="total-box">
+          <div><div class="tb-label" data-i18n="total_note">Note totale</div><div class="tb-sub" data-i18n="total_note_sub">sur 100 points</div></div>
+          <div style="display:flex;align-items:center;gap:.7rem">
+            <span class="tb-score" id="total-score">0</span>
+            <span class="badge tb-mention" id="total-mention">—</span>
+          </div>
+        </div>
+
+        <textarea class="note-area" id="note-field" data-i18n-ph="note_ph" placeholder="Observations de l'évaluateur…"></textarea>
+
+        <div class="scoring-actions">
+          <button class="btn btn-out" onclick="clearEval()" data-i18n="btn_annuler">Annuler</button>
+          <button class="btn btn-gold" id="save-btn" onclick="saveScore()" data-i18n="btn_save">💾 Enregistrer la note</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

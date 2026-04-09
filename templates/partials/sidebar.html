@@ -1,0 +1,41 @@
+<aside class="sidebar">
+  <div class="sb-logo">
+    <img src="{{ url_for('static', filename='logo-mpg.png') }}" alt="MPG" onerror="this.style.display='none'">
+    <div class="sb-logo-text">
+      <strong>EETFP — MPG</strong>
+      <span data-i18n="subtitle">Candidatures 2025–2026</span>
+    </div>
+  </div>
+
+  <div class="sb-section" data-i18n="nav_section">Navigation</div>
+  <ul class="sb-nav">
+    <li><a onclick="gotoPage('dashboard')" id="nav-dashboard" class="active">
+      <span class="nav-icon">📊</span>
+      <span data-i18n="nav_dashboard">Tableau de bord</span>
+    </a></li>
+    <li><a onclick="gotoPage('candidats')" id="nav-candidats">
+      <span class="nav-icon">👥</span>
+      <span data-i18n="nav_candidats">Candidats</span>
+      <span class="nav-badge" id="nb-count">—</span>
+    </a></li>
+    <li><a onclick="gotoPage('evaluation')" id="nav-evaluation">
+      <span class="nav-icon">⭐</span>
+      <span data-i18n="nav_evaluation">Évaluation</span>
+    </a></li>
+    <li><a onclick="gotoPage('statistiques')" id="nav-statistiques">
+      <span class="nav-icon">📈</span>
+      <span data-i18n="nav_statistiques">Statistiques</span>
+    </a></li>
+  </ul>
+
+  <div class="sb-footer">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lang-fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" id="lang-ar" onclick="setLang('ar')">عر</button>
+    </div>
+    <div class="sb-deadline" id="sb-deadline">
+      ⏰ <span data-i18n="deadline_label">Date limite :</span><br>
+      <strong>31/03/2026 à 14h00</strong>
+    </div>
+  </div>
+</aside>

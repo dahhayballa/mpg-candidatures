@@ -1,0 +1,10 @@
+config.py
+candidates.db
+*.db
+pieces_jointes/
+enrich_checkpoint.json
+ai_score_checkpoint.json
+venv/
+__pycache__/
+*.pyc
+.env

@@ -1,0 +1,67 @@
+<!-- ══════════ PAGE DASHBOARD ══════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-grid">
+    <div class="stat-card t-gold"><div class="stat-label" data-i18n="stat_total">Candidats recevables</div><div class="stat-val" id="s-total">—</div><div class="stat-sub" data-i18n="stat_total_sub">dans les délais</div></div>
+    <div class="stat-card t-red"><div class="stat-label" data-i18n="stat_hd">Hors délai</div><div class="stat-val" id="s-hd">—</div><div class="stat-sub" data-i18n="stat_hd_sub">après le 31/03 14h</div></div>
+    <div class="stat-card t-green"><div class="stat-label" data-i18n="stat_complet">Dossiers complets</div><div class="stat-val" id="s-complet">—</div><div class="stat-sub" data-i18n="stat_complet_sub">4 pièces présentes</div></div>
+    <div class="stat-card t-yellow"><div class="stat-label" data-i18n="stat_partiel">Partiels</div><div class="stat-val" id="s-partiel">—</div><div class="stat-sub" data-i18n="stat_partiel_sub">pièces manquantes</div></div>
+    <div class="stat-card t-blue"><div class="stat-label" data-i18n="stat_eval">Évalués</div><div class="stat-val" id="s-eval">—</div><div class="stat-sub" data-i18n="stat_eval_sub">note saisie</div></div>
+    <div class="stat-card t-purple"><div class="stat-label" data-i18n="stat_reste">À évaluer</div><div class="stat-val" id="s-reste">—</div><div class="stat-sub" data-i18n="stat_reste_sub">en attente</div></div>
+  </div>
+
+  <!-- Progress anneaux -->
+  <div class="progress-section">
+    <div class="progress-card">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 70 70" width="70" height="70">
+          <circle class="ring-bg" cx="35" cy="35" r="29"/>
+          <circle class="ring-fg" id="ring-eval" cx="35" cy="35" r="29" stroke="var(--blue)"
+            stroke-dasharray="182.2" stroke-dashoffset="182.2"/>
+        </svg>
+        <div class="ring-text" id="ring-eval-pct" style="color:var(--blue)">0%</div>
+      </div>
+      <div class="progress-label" data-i18n="ring_eval">Taux d'évaluation</div>
+    </div>
+    <div class="progress-card">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 70 70" width="70" height="70">
+          <circle class="ring-bg" cx="35" cy="35" r="29"/>
+          <circle class="ring-fg" id="ring-complet" cx="35" cy="35" r="29" stroke="var(--green)"
+            stroke-dasharray="182.2" stroke-dashoffset="182.2"/>
+        </svg>
+        <div class="ring-text" id="ring-complet-pct" style="color:var(--green)">0%</div>
+      </div>
+      <div class="progress-label" data-i18n="ring_complet">Dossiers complets</div>
+    </div>
+    <div class="progress-card">
+      <div class="ring-wrap">
+        <svg viewBox="0 0 70 70" width="70" height="70">
+          <circle class="ring-bg" cx="35" cy="35" r="29"/>
+          <circle class="ring-fg" id="ring-excellent" cx="35" cy="35" r="29" stroke="var(--gold)"
+            stroke-dasharray="182.2" stroke-dashoffset="182.2"/>
+        </svg>
+        <div class="ring-text" id="ring-excellent-pct" style="color:var(--gold-dd)">0%</div>
+      </div>
+      <div class="progress-label" data-i18n="ring_excellent">Candidats excellents</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">📊 <span data-i18n="specialty_repartition">Répartition par filière</span></div>
+      <div id="d-specialty-bars"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">🏆 <span data-i18n="mentions_results">Résultats de la notation</span></div>
+      <div id="d-mention-bars"></div>
+      <div style="margin-top:.9rem;padding-top:.7rem;border-top:1px solid var(--border)">
+        <div style="font-size:.67rem;color:var(--dim);line-height:1.9">
+          <span style="color:var(--green-dk)">■</span> 80–100 : <span data-i18n="mention_excellent">Excellent (prioritaire)</span><br>
+          <span style="color:var(--blue-dk)">■</span> 65–79 : <span data-i18n="mention_bon">Bon candidat</span><br>
+          <span style="color:var(--yellow-dk)">■</span> 50–64 : <span data-i18n="mention_moyen">Moyen (à discuter)</span><br>
+          <span style="color:var(--red-dk)">■</span> &lt;50 : <span data-i18n="mention_non_retenu">Non retenu</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
