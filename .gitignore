@@ -8,3 +8,8 @@ venv/
 __pycache__/
 *.pyc
 .env
+*.xlsx
+database.sqlite
+~$*
+reset_*.py
+fix_sync.py

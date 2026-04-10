@@ -1,70 +1,188 @@
-<!-- ══════════ PAGE ÉVALUATION ══════════ -->
+<!-- ══════════ PAGE ÉVALUATION (Glass Version) ══════════ -->
 <div class="page" id="page-evaluation">
-  <div class="eval-empty" id="eval-empty">
-    <div class="big-icon">⭐</div>
-    <p style="font-weight:600;margin-bottom:.5rem" data-i18n="eval_select_title">Sélectionner un candidat</p>
-    <p style="font-size:.8rem" data-i18n="eval_select_sub">Allez dans la page Candidats et cliquez sur une ligne pour commencer l'évaluation.</p>
-    <button class="btn btn-gold" style="margin-top:1rem" onclick="gotoPage('candidats')" data-i18n="eval_go_candidats">Voir les candidats →</button>
-  </div>
-  <div class="eval-layout" id="eval-layout" style="display:none">
-    <!-- Colonne gauche : infos -->
-    <div>
-      <div class="cand-info-card">
-        <div class="cand-avatar" id="ev-avatar">?</div>
-        <div class="cand-name" id="ev-name">—</div>
-        <div class="cand-email" id="ev-email">—</div>
-        <div id="ev-info-rows"></div>
-        <div class="docs-grid" id="ev-docs"></div>
-      </div>
+  
+  <!-- EMPTY STATE -->
+  <div class="widget" id="eval-empty" style="text-align:center; padding:5rem 2rem;">
+    <div style="background:var(--accent-light); width:80px; height:80px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 2.5rem; color:var(--accent)">
+        <i data-lucide="star" style="width:40px; height:40px;"></i>
     </div>
-    <!-- Colonne droite : grille -->
+    <h2 style="font-weight:800; margin-bottom:1rem; color:var(--primary)" data-i18n="eval_select_title">Sélectionner un candidat</h2>
+    <p style="color:var(--text-muted); max-width:400px; margin:0 auto 2.5rem;" data-i18n="eval_select_sub">Allez dans la page Candidats et cliquez sur une ligne pour commencer l'évaluation personnalisée.</p>
+    <button class="btn btn-primary" onclick="gotoPage('candidats')" data-i18n="eval_go_candidats">Voir les candidats →</button>
+  </div>
+
+  <div class="eval-layout" id="eval-layout" style="display:none; grid-template-columns: 320px 1fr; gap:2.5rem;">
+    <!-- LEFT COLUMN: CANDIDATE CARD -->
     <div>
-      <div class="scoring-card">
-        <div class="scoring-title" data-i18n="scoring_grid">Grille d'évaluation — /100 points</div>
-        <div class="criterion">
-          <div class="crit-hd"><span class="crit-name" data-i18n="crit_niveau">Niveau d'études</span><span class="crit-cap">/25</span></div>
-          <div class="crit-desc" data-i18n="crit_niveau_desc">Correspondance avec la filière, niveau minimum requis, pertinence</div>
-          <div class="crit-row"><input type="range" class="slider" id="sl-niveau" min="0" max="25" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-niveau">0</span></div>
+      <div class="widget" style="position:sticky; top:2.5rem;">
+        <div class="cand-avatar" id="ev-avatar">?</div>
+        <div style="text-align:center; margin-bottom:2rem;">
+            <h3 id="ev-name" style="font-weight:800; color:var(--primary); font-size:1.25rem;">—</h3>
+            <p id="ev-email" style="color:var(--text-dim); font-size:0.85rem;">—</p>
         </div>
-        <div class="criterion">
-          <div class="crit-hd"><span class="crit-name" data-i18n="crit_exp">Expérience</span><span class="crit-cap">/20</span></div>
-          <div class="crit-desc" data-i18n="crit_exp_desc">Stages, expériences professionnelles ou pratiques liées au domaine</div>
-          <div class="crit-row"><input type="range" class="slider" id="sl-experience" min="0" max="20" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-experience">0</span></div>
-        </div>
-        <div class="criterion">
-          <div class="crit-hd"><span class="crit-name" data-i18n="crit_motiv">Lettre de motivation</span><span class="crit-cap">/20</span></div>
-          <div class="crit-desc" data-i18n="crit_motiv_desc">Clarté, cohérence, motivation réelle, projet professionnel</div>
-          <div class="crit-row"><input type="range" class="slider" id="sl-motivation" min="0" max="20" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-motivation">0</span></div>
-        </div>
-        <div class="criterion">
-          <div class="crit-hd"><span class="crit-name" data-i18n="crit_adeq">Adéquation au profil</span><span class="crit-cap">/20</span></div>
-          <div class="crit-desc" data-i18n="crit_adeq_desc">Compatibilité avec la formation, aptitudes techniques, logique</div>
-          <div class="crit-row"><input type="range" class="slider" id="sl-adequation" min="0" max="20" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-adequation">0</span></div>
-        </div>
-        <div class="criterion">
-          <div class="crit-hd"><span class="crit-name" data-i18n="crit_dossier">Qualité du dossier</span><span class="crit-cap">/10</span><span class="crit-auto-tag">⚡ Auto</span></div>
-          <div class="crit-desc" data-i18n="crit_dossier_desc">CV (2.5) + Lettre motivation (2.5) + CIN (2.5) + Diplômes (2.5)</div>
-          <div class="crit-row"><input type="range" class="slider" id="sl-dossier" min="0" max="10" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-dossier">0</span></div>
-        </div>
-        <div class="criterion">
-          <div class="crit-hd"><span class="crit-name" data-i18n="crit_dispo">Disponibilité</span><span class="crit-cap">/5</span></div>
-          <div class="crit-desc" data-i18n="crit_dispo_desc">Capacité à suivre toute la formation (3 à 6 mois, temps plein)</div>
-          <div class="crit-row"><input type="range" class="slider" id="sl-disponibilite" min="0" max="5" step="0.5" value="0" oninput="liveScore()"><span class="crit-val" id="v-disponibilite">0</span></div>
+        
+        <div id="ev-info-rows">
+            <!-- Dynamic info rows -->
         </div>
 
-        <div class="total-box">
-          <div><div class="tb-label" data-i18n="total_note">Note totale</div><div class="tb-sub" data-i18n="total_note_sub">sur 100 points</div></div>
-          <div style="display:flex;align-items:center;gap:.7rem">
-            <span class="tb-score" id="total-score">0</span>
-            <span class="badge tb-mention" id="total-mention">—</span>
+        <!-- WARNING MANQUANT (New) -->
+        <div id="ev-missing-warning" style="display:none; margin-top:1.5rem; background:#fff3cd; border:1px solid #ffeeba; border-radius:12px; padding:1rem; color:#856404; font-size:0.8rem;">
+            <div style="font-weight:800; margin-bottom:0.25rem; display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="alert-triangle" style="width:16px;height:16px;"></i> Dossier Incomplet ou Vide
+            </div>
+            Ce dossier nécessite d'être marqué <strong>Non Retenu</strong>, à moins que les pièces ne soient dans un format non supporté. Veuillez vérifier le dossier manuellement.
+        </div>
+
+        <!-- AI INSPECTOR (New) -->
+        <div id="ev-ai-inspector-box" style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--glass-border); display:none;">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="eye" style="width:14px;height:14px;"></i> Ce que l'IA a lu
+            </div>
+            <div id="ev-ocr-text" style="background:rgba(99, 102, 241, 0.05); border:1px solid var(--accent-light); border-radius:12px; padding:0.75rem; font-size:0.75rem; color:var(--text-dim); max-height:160px; overflow-y:auto; line-height:1.4; white-space: pre-wrap;">
+                <!-- Raw text from OCR -->
+            </div>
+        </div>
+
+        <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--glass-border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;">Dossier Original</div>
+                <div id="ev-evaluator-badge" class="badge b-vide" style="font-size:0.6rem;">Status</div>
+            </div>
+            <div id="ev-attachments" style="display:flex; flex-direction:column; gap:0.5rem;">
+                <!-- Actual file links will be rendered here -->
+            </div>
+        </div>
+
+        <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--glass-border);">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--text-dim); text-transform:uppercase; margin-bottom:1rem; letter-spacing:0.05em;">Indicateurs Rapidité</div>
+            <div id="ev-docs" style="display:grid; grid-template-columns: repeat(2, 1fr); gap:0.75rem;">
+                <!-- Status markers -->
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: SCORING GRID -->
+    <div>
+      <div class="widget">
+        <div class="widget-header" style="margin-bottom:1.5rem;">
+            <div class="widget-title"><i data-lucide="award" style="color:var(--accent)"></i> <span data-i18n="scoring_grid">Grille d'évaluation</span></div>
+            <div style="font-size:0.75rem; font-weight:700; background:var(--accent-light); color:var(--accent); padding:0.2rem 0.6rem; border-radius:20px;">100 pts</div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;">
+            <!-- Criteria Grid -->
+            <div class="criterion">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <span class="crit-name" data-i18n="crit_niveau" style="font-weight:800; color:var(--primary)">Niveau d'études</span>
+                    <span class="crit-cap">/25</span>
+                </div>
+                <div class="crit-desc" data-i18n="crit_niveau_desc">Correspondance avec la filière, niveau minimum requis.</div>
+                <div class="crit-row">
+                    <input type="range" class="slider" id="sl-niveau" min="0" max="25" step="0.5" value="0" oninput="liveScore()">
+                    <span class="crit-val" id="v-niveau">0</span>
+                </div>
+                <div class="justif-text" id="j-niveau"></div>
+            </div>
+
+            <div class="criterion">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <span class="crit-name" data-i18n="crit_exp" style="font-weight:800; color:var(--primary)">Expérience</span>
+                    <span class="crit-cap">/20</span>
+                </div>
+                <div class="crit-desc" data-i18n="crit_exp_desc">Stages, expériences professionnelles liées au domaine.</div>
+                <div class="crit-row">
+                    <input type="range" class="slider" id="sl-experience" min="0" max="20" step="0.5" value="0" oninput="liveScore()">
+                    <span class="crit-val" id="v-experience">0</span>
+                </div>
+                <div class="justif-text" id="j-experience"></div>
+            </div>
+
+            <div class="criterion">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <span class="crit-name" data-i18n="crit_motiv" style="font-weight:800; color:var(--primary)">Motivation</span>
+                    <span class="crit-cap">/20</span>
+                </div>
+                <div class="crit-desc" data-i18n="crit_motiv_desc">Clarté, cohérence, motivation réelle, projet pro.</div>
+                <div class="crit-row">
+                    <input type="range" class="slider" id="sl-motivation" min="0" max="20" step="0.5" value="0" oninput="liveScore()">
+                    <span class="crit-val" id="v-motivation">0</span>
+                </div>
+                <div class="justif-text" id="j-motivation"></div>
+            </div>
+
+            <div class="criterion">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <span class="crit-name" data-i18n="crit_adeq" style="font-weight:800; color:var(--primary)">Adéquation</span>
+                    <span class="crit-cap">/20</span>
+                </div>
+                <div class="crit-desc" data-i18n="crit_adeq_desc">Compatibilité formation, aptitudes, logique.</div>
+                <div class="crit-row">
+                    <input type="range" class="slider" id="sl-adequation" min="0" max="20" step="0.5" value="0" oninput="liveScore()">
+                    <span class="crit-val" id="v-adequation">0</span>
+                </div>
+                <div class="justif-text" id="j-adequation"></div>
+            </div>
+
+            <div class="criterion" style="background:rgba(16, 185, 129, 0.05); border-color:rgba(16, 185, 129, 0.2)">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <span class="crit-name" data-i18n="crit_dossier" style="font-weight:800; color:var(--success)">Qualité Dossier</span>
+                    <span class="crit-cap" style="color:var(--success)">/10 ⚡ Auto</span>
+                </div>
+                <div class="crit-desc" data-i18n="crit_dossier_desc">Présence des 4 pièces obligatoires.</div>
+                <div class="crit-row">
+                    <input type="range" class="slider" id="sl-dossier" min="0" max="10" step="0.5" value="0" oninput="liveScore()" style="accent-color:var(--success)">
+                    <span class="crit-val" id="v-dossier" style="color:var(--success); border-color:var(--success)">0</span>
+                </div>
+                <div class="justif-text" id="j-dossier" style="color:var(--success); opacity:0.8; font-weight:600;"></div>
+            </div>
+
+            <div class="criterion">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <span class="crit-name" data-i18n="crit_dispo" style="font-weight:800; color:var(--primary)">Disponibilité</span>
+                    <span class="crit-cap">/5</span>
+                </div>
+                <div class="crit-desc" data-i18n="crit_dispo_desc">Capacité à suivre la formation à temps plein.</div>
+                <div class="crit-row">
+                    <input type="range" class="slider" id="sl-disponibilite" min="0" max="5" step="0.1" value="0" oninput="liveScore()">
+                    <span class="crit-val" id="v-disponibilite">0</span>
+                </div>
+                <div class="justif-text" id="j-disponibilite"></div>
+            </div>
+        </div>
+
+        <!-- TOTAL BOX -->
+        <div class="total-box" style="padding:1.25rem; margin-top:1.5rem; gap:1rem;">
+          <div>
+              <div class="tb-label" data-i18n="total_note" style="font-weight:800; font-size:0.9rem; opacity:0.8;">Note finale</div>
+              <div class="tb-sub" data-i18n="total_note_sub" style="font-size:0.7rem;">Score sur 100 points</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:1rem">
+            <span class="tb-score" id="total-score" style="font-size:2rem;">0</span>
+            <span class="badge tb-mention" id="total-mention" style="font-size:0.7rem;">—</span>
           </div>
         </div>
 
-        <textarea class="note-area" id="note-field" data-i18n-ph="note_ph" placeholder="Observations de l'évaluateur…"></textarea>
+        <div style="margin-top:1.25rem;">
+            <div style="font-size:0.7rem; font-weight:800; color:var(--text-dim); text-transform:uppercase; margin-bottom:0.5rem;">Observations</div>
+            <textarea class="note-area" id="note-field" data-i18n-ph="note_ph" style="width:100%; height:80px; background:rgba(255,255,255,0.5); border:1px solid var(--glass-border); border-radius:0.75rem; padding:1rem; font-family:inherit; font-size:0.85rem; outline:none; transition:all 0.2s;" placeholder="Observations…"></textarea>
+        </div>
 
-        <div class="scoring-actions">
-          <button class="btn btn-out" onclick="clearEval()" data-i18n="btn_annuler">Annuler</button>
-          <button class="btn btn-gold" id="save-btn" onclick="saveScore()" data-i18n="btn_save">💾 Enregistrer la note</button>
+        <div style="margin-top:1.5rem; display:flex; gap:0.75rem; justify-content:space-between; align-items:center;">
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-glass" onclick="markRetenu(1)" style="color:var(--success); border-color:var(--success); padding:0.6rem 1rem;">
+              <i data-lucide="check-circle" style="width:16px;height:16px"></i> Retenu
+            </button>
+            <button class="btn btn-glass" onclick="markRetenu(0)" style="color:var(--danger); border-color:var(--danger); padding:0.6rem 1rem;">
+              <i data-lucide="x-circle" style="width:16px;height:16px"></i> Non retenu
+            </button>
+          </div>
+          <div style="display:flex; gap:0.5rem;">
+            <button class="btn btn-glass" onclick="gotoPage('candidats')" data-i18n="btn_annuler" style="padding:0.6rem 1.5rem;">Annuler</button>
+            <button class="btn btn-primary" id="save-btn" onclick="saveScore()" data-i18n="btn_save" style="padding:0.6rem 2.5rem;">
+                <i data-lucide="save" style="width:16px;height:16px"></i> Enregistrer
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ c = conn.cursor()
 existing = [r[1] for r in c.execute("PRAGMA table_info(candidates)").fetchall()]
 for col, typedef in [
     ("retenu",  "INTEGER DEFAULT 0"),
+    ("verification_required", "INTEGER DEFAULT 0"),
 ]:
     if col not in existing:
         c.execute(f"ALTER TABLE candidates ADD COLUMN {col} {typedef}")

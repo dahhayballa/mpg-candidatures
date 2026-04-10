@@ -22,10 +22,10 @@ CHECKPOINT_FILE = "ai_score_checkpoint.json"
 # ─────────────────────────────────────────────────────
 
 def call_claude(prompt: str, max_retries: int = 3) -> str:
-    """Appelle Claude claude-sonnet-4-5 et retourne la réponse texte."""
+    """Appelle Claude Haiku (économique) et retourne la réponse texte."""
     url = "https://api.anthropic.com/v1/messages"
     body = json.dumps({
-        "model": "claude-sonnet-4-5",
+        "model": "claude-3-haiku-20240307",
         "max_tokens": 1024,
         "messages": [{"role": "user", "content": prompt}]
     }).encode("utf-8")
@@ -116,8 +116,12 @@ Contenu des pièces jointes (OCR) :
 
 Évalue ce candidat selon la GRILLE OFFICIELLE ci-dessous.
 Attribue une note à chaque critère en te basant UNIQUEMENT sur les informations disponibles.
-Si une information est absente, attribue 0 pour ce critère et explique pourquoi.
-Sois rigoureux, juste et cohérent. Ne donne ni trop ni pas assez.
+RÈGLES LOGIQUES STRICTES (IMPÉRATIF) :
+1. PREUVE PAR DOCUMENT : Toute information déclarée dans l'E-MAIL mais non supportée par une PIÈCE JOINTE (CV, Diplôme, CID) doit être ignorée ou notée à 0. Une déclaration écrite ne remplace pas une preuve documentaire.
+2. ABSENCE DE CV => Note "Expérience" = 0. (Interdiction de déduire l'expérience du texte de l'e-mail).
+3. ABSENCE DE LETTRE => Note "Motivation" = 0.
+4. ABSENCE DE DIPLÔME => Note "Niveau d'études" = 0.
+5. AUCUN DOCUMENT => La note globale doit être proche de 0, avec une observation invitant le candidat à compléter son dossier.
 
 GRILLE D'ÉVALUATION :
 1. Niveau d'études       : /25 (correspondance avec la filière, niveau minimum requis)
@@ -261,13 +265,31 @@ def run():
             errors += 1
             continue
 
-        # Valider et plafonner les scores
+        # ─────────────────────────────────────────────────────
+        # IRON LOGIC : On force les scores à 0 si les documents sont absents
+        # (L'humain a toujours le dernier mot via les flags has_xxx)
+        # ─────────────────────────────────────────────────────
+        has_cv    = candidate.get("has_cv", 0)
+        has_mot   = candidate.get("has_motivation", 0)
+        has_dipl  = candidate.get("has_diplomas", 0)
+
         sn = min(float(result.get("score_niveau", 0)),      25)
         se = min(float(result.get("score_experience", 0)),  20)
         sm = min(float(result.get("score_motivation", 0)),  20)
         sa = min(float(result.get("score_adequation", 0)),  20)
         sd = min(float(result.get("score_dossier", 0)),     10)
         sv = min(float(result.get("score_disponibilite",0)), 5)
+
+        # Sanitaires (Enforcement)
+        if not has_cv: 
+            se = 0
+            reason_se = "[FORCÉ 0: CV absents]"
+        if not has_mot:
+            sm = 0
+            reason_sm = "[FORCÉ 0: Lettre absente]"
+        if not has_dipl:
+            sn = min(sn, 5) # Plafond à 5 points pour les dires dans l'email sans preuve
+
         total_score = round(sn + se + sm + sa + sd + sv, 1)
         mention_str = mention(total_score)
 
@@ -317,8 +339,15 @@ def run():
                     score_disponibilite, score_total, mention, note, created_at)
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(candidate_id, evaluateur) DO UPDATE SET
+                score_niveau=excluded.score_niveau,
+                score_experience=excluded.score_experience,
+                score_motivation=excluded.score_motivation,
+                score_adequation=excluded.score_adequation,
+                score_dossier=excluded.score_dossier,
+                score_disponibilite=excluded.score_disponibilite,
                 score_total=excluded.score_total,
                 mention=excluded.mention,
+                note=excluded.note,
                 created_at=excluded.created_at
         """, (
             cid, EVALUATEUR_IA, sn, se, sm, sa, sd, sv,

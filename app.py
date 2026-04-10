@@ -15,6 +15,7 @@ from core.domain.entities import Candidate
 from infrastructure.persistence.sqlite_repository import SqliteCandidateRepository, SqliteAuditLogRepository
 from core.use_cases.get_stats import GetStatsUseCase
 from core.use_cases.evaluate_candidate import EvaluateCandidateUseCase
+from core.use_cases.retenir_candidate import RetenirCandidateUseCase
 
 app = Flask(__name__)
 DEADLINE = "2026-03-31 14:00"
@@ -25,6 +26,7 @@ audit_repo = SqliteAuditLogRepository(config.DB_PATH)
 
 get_stats_uc = GetStatsUseCase(candidate_repo, audit_repo, DEADLINE)
 evaluate_uc = EvaluateCandidateUseCase(candidate_repo, audit_repo)
+retenir_uc = RetenirCandidateUseCase(candidate_repo, audit_repo)
 
 # --- Routes ---
 
@@ -47,6 +49,9 @@ def api_candidates() -> Response:
         "status": str(request.args.get("status", "")),
         "specialty": str(request.args.get("specialty", "")),
         "mention": str(request.args.get("mention", "")),
+        "verification_required": request.args.get("verification_required", ""),
+        "contenu_manquant": request.args.get("contenu_manquant", ""),
+        "retenu": request.args.get("retenu", "")
     }
     page = max(1, int(request.args.get("page", 1)))
     per_page = min(100, int(request.args.get("per_page", 50)))
@@ -79,6 +84,39 @@ def api_evaluate(cid: int) -> Union[Response, Tuple[Response, int]]:
     if not res:
         return jsonify({"error": "Erreur"}), 400
     return jsonify(res)
+
+@app.route("/api/candidate/<int:cid>/retenir", methods=["POST"])
+def api_retenir(cid: int) -> Union[Response, Tuple[Response, int]]:
+    data = request.get_json()
+    if not data: return jsonify({"error": "No data"}), 400
+    retenu = bool(data.get("retenu", False))
+    evaluateur = str(data.get("evaluateur", "Admin"))
+    res = retenir_uc.execute(cid, retenu, evaluateur)
+    if not res:
+        return jsonify({"error": "Introuvable"}), 404
+    return jsonify(res)
+
+@app.route("/api/candidate/<int:cid>/open-folder", methods=["GET", "POST"])
+def api_open_folder(cid: int) -> Union[Response, Tuple[Response, int]]:
+    candidate = candidate_repo.get_by_id(cid)
+    if not candidate or not candidate.folder_path:
+        return jsonify({"error": "Dossier introuvable"}), 404
+    
+    path = os.path.abspath(os.path.join(config.ATTACHMENTS_DIR, candidate.folder_path))
+    if os.path.exists(path):
+        import subprocess
+        if sys.platform == 'win32':
+            subprocess.Popen(['explorer', path])
+        elif sys.platform == 'darwin':
+            subprocess.Popen(['open', path])
+        else:
+            subprocess.Popen(['xdg-open', path])
+        return jsonify({"success": True, "path": path})
+    return jsonify({"error": "Chemin invalide", "path": path}), 400
+
+@app.route("/api/quotas")
+def api_quotas() -> Response:
+    return jsonify(candidate_repo.get_quotas())
 
 @app.route("/api/export/csv")
 def export_csv() -> Response:

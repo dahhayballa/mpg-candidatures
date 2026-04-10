@@ -16,6 +16,14 @@ class Evaluation:
     mention: Optional[str] = None
     note: str = ""
     created_at: str = field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M"))
+    # AI justifications per criterion
+    justif_niveau: str = ""
+    justif_experience: str = ""
+    justif_motivation: str = ""
+    justif_adequation: str = ""
+    justif_dossier: str = ""
+    justif_disponibilite: str = ""
+    note_globale: str = ""  # AI global summary
 
     def calculate_total(self) -> None:
         val = (
@@ -49,6 +57,7 @@ class Candidate:
     score_total: Optional[float] = None
     mention: Optional[str] = None
     retenu: bool = False
+    verification_required: bool = False
     enriched: bool = False
     hors_delai: bool = False
     attachment_names: List[str] = field(default_factory=list)
@@ -76,10 +85,20 @@ class Candidate:
             self.mention = None
             return
         
-        # Calculate in a local variable to satisfy the linter's Null/Optional check
-        totals = [float(e.score_total) for e in self.evaluations]
-        avg = sum(totals) / len(totals)
-        sum_total = round(avg, 1)
+        # Priority: 1. Latest Human, 2. Latest AI
+        human_evals = [e for e in self.evaluations if not e.evaluateur.startswith('IA')]
+        ai_evals = [e for e in self.evaluations if e.evaluateur.startswith('IA')]
         
-        self.score_total = sum_total
-        self.mention = Evaluation._get_mention(sum_total)
+        target = None
+        if human_evals:
+            # Sort by date if available, or just take the last one
+            target = human_evals[-1]
+        elif ai_evals:
+            target = ai_evals[-1]
+            
+        if target:
+            self.score_total = target.score_total
+            self.mention = target.mention
+        else:
+            self.score_total = None
+            self.mention = None

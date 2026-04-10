@@ -1,19 +1,23 @@
-<!-- ══════════ PAGE CANDIDATS ══════════ -->
+<!-- ══════════ PAGE CANDIDATS (Fantastic Version) ══════════ -->
 <div class="page" id="page-candidats">
+  
+  <!-- FILTERS & CONTROLS -->
   <div class="controls">
     <div class="srch-w">
-      <span class="srch-ic">🔍</span>
+      <i data-lucide="search" class="srch-ic"></i>
       <input class="srch" type="text" id="searchInput" data-i18n-ph="search_ph" placeholder="Rechercher…" oninput="debounce(loadTable,350)()">
     </div>
+    
     <select class="flt" id="statusFilter" onchange="loadTable()">
-      <option value="" data-i18n="all_statuts">Tous les statuts</option>
+      <option value="" data-i18n="all_statuts">Status</option>
       <option value="Complet" data-i18n="complet">✅ Complet</option>
       <option value="Partiel" data-i18n="partiel">🟡 Partiel</option>
       <option value="Incomplet" data-i18n="incomplet">❌ Incomplet</option>
       <option value="Vide" data-i18n="vide">⚪ Vide</option>
     </select>
+
     <select class="flt" id="specialtyFilter" onchange="loadTable()">
-      <option value="" data-i18n="all_filieres">Toutes les filières</option>
+      <option value="" data-i18n="all_filieres">Filière</option>
       <option>Maintenance industrielle</option>
       <option>Électricité industrielle</option>
       <option>Tuyauterie industrielle</option>
@@ -21,38 +25,80 @@
       <option>HSE</option>
       <option>Opérations pétrolières et gazières</option>
       <option>Techniques minières</option>
-      <option>Non spécifié</option>
+      <option value="Non spécifié">Non spécifié</option>
     </select>
+
+    <select class="flt" id="verifyFilter" onchange="loadTable()">
+        <option value="" data-i18n="all_verify">Vérification</option>
+        <option value="1" data-i18n="needs_verify">⚠️ À vérifier</option>
+    </select>
+
     <select class="flt" id="mentionFilter" onchange="loadTable()">
-      <option value="" data-i18n="all_mentions">Toutes les mentions</option>
+      <option value="" data-i18n="all_mentions">Mention</option>
       <option value="Excellent">🏆 Excellent</option>
       <option value="Bon">✅ Bon</option>
       <option value="Moyen">🟡 Moyen</option>
       <option value="Non retenu">❌ Non retenu</option>
     </select>
-    <select class="flt" id="evalueFilter" onchange="loadTable()">
-      <option value="" data-i18n="all_eval">Tous</option>
-      <option value="non" data-i18n="a_evaluer">À évaluer</option>
-      <option value="oui" data-i18n="evalues">Déjà évalués</option>
-    </select>
-    <span class="rc" id="resultCount"></span>
+
+    <button class="btn btn-glass" onclick="resetFilters()" title="Réinitialiser">
+        <i data-lucide="filter-x" style="width:16px;height:16px;"></i>
+    </button>
+    
+    <span class="rc" id="resultCount">0 entries</span>
   </div>
-  <div class="tbl-wrap">
+
+  <!-- TABLE REGISTRY -->
+  <div class="table-container">
     <table>
       <thead><tr>
-        <th onclick="setSort('name')"><span class="si">↕</span> <span data-i18n="col_nom">Nom</span></th>
-        <th onclick="setSort('email_addr')"><span class="si">↕</span> E-mail</th>
-        <th onclick="setSort('specialty')"><span class="si">↕</span> <span data-i18n="col_filiere">Filière</span></th>
-        <th style="text-align:center" data-i18n="col_pieces">Pièces</th>
-        <th onclick="setSort('status')"><span class="si">↕</span> <span data-i18n="col_dossier">Dossier</span></th>
-        <th onclick="setSort('score_total')" style="text-align:center"><span class="si">↕</span> <span data-i18n="col_note">Note /100</span></th>
-        <th onclick="setSort('mention')"><span class="si">↕</span> <span data-i18n="col_mention">Mention</span></th>
-        <th onclick="setSort('last_date')"><span class="si">↕</span> <span data-i18n="col_date">Date</span></th>
+        <th onclick="setSort('name')" style="width:30%">
+            <div class="th-content">
+                <span data-i18n="col_nom">Nom</span>
+                <i data-lucide="chevrons-up-down" class="sort-ic"></i>
+            </div>
+        </th>
+        <th onclick="setSort('specialty')">
+            <div class="th-content">
+                <span data-i18n="col_filiere">Filière</span>
+                <i data-lucide="chevrons-up-down" class="sort-ic"></i>
+            </div>
+        </th>
+        <th style="text-align:center">
+            <div class="th-content" style="justify-content:center">
+                <span data-i18n="col_pieces">Pièces</span>
+            </div>
+        </th>
+        <th onclick="setSort('status')">
+            <div class="th-content">
+                <span data-i18n="col_dossier">Dossier</span>
+                <i data-lucide="chevrons-up-down" class="sort-ic"></i>
+            </div>
+        </th>
+        <th onclick="setSort('score_total')" style="text-align:center">
+            <div class="th-content" style="justify-content:center">
+                <span data-i18n="col_note">Note</span>
+                <i data-lucide="chevrons-up-down" class="sort-ic"></i>
+            </div>
+        </th>
+        <th onclick="setSort('mention')">
+            <div class="th-content">
+                <span data-i18n="col_mention">Mention</span>
+                <i data-lucide="chevrons-up-down" class="sort-ic"></i>
+            </div>
+        </th>
+        <th onclick="setSort('last_date')">
+            <div class="th-content">
+                <span data-i18n="col_date">Date</span>
+                <i data-lucide="chevrons-up-down" class="sort-ic"></i>
+            </div>
+        </th>
       </tr></thead>
       <tbody id="tableBody">
-        <tr><td colspan="8" class="loading-td"><div class="spinner"></div></td></tr>
+        <tr><td colspan="7" style="text-align:center;padding:5rem;"><div class="spinner"></div></td></tr>
       </tbody>
     </table>
+    <!-- PAGINATION -->
     <div class="pagination" id="pagination"></div>
   </div>
 </div>

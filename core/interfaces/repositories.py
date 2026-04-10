@@ -26,6 +26,15 @@ class ICandidateRepository(ABC):
     def get_stats(self) -> Dict[str, Any]:
         raise NotImplementedError
 
+    @abstractmethod
+    def mark_retenu(self, candidate_id: int, retenu: bool) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_quotas(self) -> List[Dict[str, Any]]:
+        """Return per-specialty quota stats for the Quotas & Sélection page."""
+        raise NotImplementedError
+
 class IAuditLogRepository(ABC):
     @abstractmethod
     def log(self, action: str, evaluateur: str, detail: str) -> None:

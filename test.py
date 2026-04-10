@@ -1,8 +1,8 @@
 import sqlite3, config
 conn = sqlite3.connect(config.DB_PATH)
 c = conn.cursor()
-tables = c.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()
-print('Tables:', [t[0] for t in tables])
-cols = [r[1] for r in c.execute("PRAGMA table_info(candidates)").fetchall()]
-print('Colonnes:', cols)
+print('Complets:', c.execute("SELECT COUNT(*) FROM candidates WHERE status='Complet' AND hors_delai=0").fetchone()[0])
+print('Partiels:', c.execute("SELECT COUNT(*) FROM candidates WHERE status='Partiel' AND hors_delai=0").fetchone()[0])
+print('Evalues:', c.execute("SELECT COUNT(*) FROM candidates WHERE ia_scored=1 AND hors_delai=0").fetchone()[0])
+print('Score moyen:', c.execute("SELECT AVG(score_total) FROM candidates WHERE hors_delai=0 AND score_total IS NOT NULL").fetchone()[0])
 conn.close()

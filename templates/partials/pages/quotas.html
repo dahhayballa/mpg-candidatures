@@ -1,0 +1,48 @@
+<!-- ══════════ PAGE QUOTAS & SÉLECTION ══════════ -->
+<div class="page" id="page-quotas">
+
+  <!-- TOP STATS -->
+  <div class="stats-grid" id="quotas-stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <!-- Populated by JS -->
+  </div>
+
+  <!-- TABLE DES TOPS CANDIDATS -->
+  <div class="widget" style="margin-top:2rem;">
+    <div class="widget-header">
+      <div class="widget-title">
+        <i data-lucide="users" style="color:var(--accent)"></i> 
+        <span>Top Candidats</span>
+      </div>
+      <div style="display:flex; gap:1rem; align-items:center;">
+        <select class="flt" id="quotasSpecialtyFilter" onchange="loadQuotasTable()" style="min-width:200px;">
+          <option value="">Toutes les filières</option>
+          <option>Maintenance industrielle</option>
+          <option>Électricité industrielle</option>
+          <option>Tuyauterie industrielle</option>
+          <option>Construction métallique et soudure</option>
+          <option>HSE</option>
+          <option>Opérations pétrolières et gazières</option>
+          <option>Techniques minières</option>
+        </select>
+      </div>
+    </div>
+    
+    <div class="table-container" style="border:none; box-shadow:none;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:30%">Candidat</th>
+            <th>Filière</th>
+            <th style="text-align:center">Note Interne</th>
+            <th style="text-align:center">Note Ext.</th>
+            <th style="text-align:center">Décision</th>
+          </tr>
+        </thead>
+        <tbody id="quotasTableBody">
+          <tr><td colspan="5" style="text-align:center;padding:5rem;"><div class="spinner"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

@@ -32,7 +32,7 @@ class SqliteCandidateRepository(ICandidateRepository):
                     name=?, num_emails=?, first_date=?, last_date=?, specialty=?,
                     num_attachments=?, attachment_names=?, has_cv=?, has_motivation=?,
                     has_id=?, has_diplomas=?, status=?, subjects=?, body_preview=?,
-                    folder_path=?, score_total=?, mention=?, retenu=?, enriched=?, hors_delai=?
+                    folder_path=?, score_total=?, mention=?, retenu=?, verification_required=?, enriched=?, hors_delai=?
                 WHERE email_addr=?
             """, (
                 candidate.name, candidate.num_emails, candidate.first_date, candidate.last_date,
@@ -40,7 +40,7 @@ class SqliteCandidateRepository(ICandidateRepository):
                 int(candidate.has_cv), int(candidate.has_motivation), int(candidate.has_id),
                 int(candidate.has_diplomas), candidate.status, json.dumps(candidate.subjects),
                 candidate.body_preview, candidate.folder_path, candidate.score_total,
-                candidate.mention, int(candidate.retenu), int(candidate.enriched),
+                candidate.mention, int(candidate.retenu), int(candidate.verification_required), int(candidate.enriched),
                 int(candidate.hors_delai), candidate.email_addr
             ))
             candidate.id = row['id']
@@ -51,8 +51,8 @@ class SqliteCandidateRepository(ICandidateRepository):
                     email_addr, name, num_emails, first_date, last_date, specialty,
                     num_attachments, attachment_names, has_cv, has_motivation,
                     has_id, has_diplomas, status, subjects, body_preview,
-                    folder_path, score_total, mention, retenu, enriched, hors_delai
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    folder_path, score_total, mention, retenu, verification_required, enriched, hors_delai
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             """, (
                 candidate.email_addr, candidate.name, candidate.num_emails,
                 candidate.first_date, candidate.last_date, candidate.specialty,
@@ -62,7 +62,7 @@ class SqliteCandidateRepository(ICandidateRepository):
                 candidate.status, json.dumps(candidate.subjects),
                 candidate.body_preview, candidate.folder_path,
                 candidate.score_total, candidate.mention,
-                int(candidate.retenu), int(candidate.enriched), int(candidate.hors_delai)
+                int(candidate.retenu), int(candidate.verification_required), int(candidate.enriched), int(candidate.hors_delai)
             ))
             candidate.id = c.lastrowid
         
@@ -115,12 +115,20 @@ class SqliteCandidateRepository(ICandidateRepository):
             if filters.get('mention'):
                 where.append("mention = ?")
                 params.append(filters['mention'])
+            if filters.get('verification_required') is not None and filters.get('verification_required') != '':
+                where.append("verification_required = ?")
+                params.append(int(filters['verification_required']))
+            if filters.get('contenu_manquant') == '1' or filters.get('contenu_manquant') is True:
+                where.append("(status = 'Vide' OR status = 'Incomplet' OR status = 'Partiel')")
+            if filters.get('retenu') is not None and filters.get('retenu') != '':
+                where.append("retenu = ?")
+                params.append(int(filters['retenu']))
         
         wsql = "WHERE " + " AND ".join(where) if where else ""
         total_row = conn.execute(f"SELECT COUNT(*) FROM candidates {wsql}", params).fetchone()
         total = total_row[0] if total_row else 0
         
-        order_sql = f"ORDER BY {sort} DESC" if sort else "ORDER BY last_date DESC"
+        order_sql = f"ORDER BY {sort} DESC" if sort else "ORDER BY score_total DESC"
         
         rows = conn.execute(f"""
             SELECT * FROM candidates {wsql} {order_sql}
@@ -144,12 +152,42 @@ class SqliteCandidateRepository(ICandidateRepository):
             "complet": q("SELECT COUNT(*) FROM candidates WHERE status='Complet' AND hors_delai=0"),
             "partiel": q("SELECT COUNT(*) FROM candidates WHERE status='Partiel' AND hors_delai=0"),
             "vide": q("SELECT COUNT(*) FROM candidates WHERE status='Vide' AND hors_delai=0"),
-            "evalues": q("SELECT COUNT(DISTINCT candidate_id) FROM evaluations"),
+            "eval_ia":    q("SELECT COUNT(DISTINCT candidate_id) FROM evaluations WHERE evaluateur LIKE 'IA%'"),
+            "eval_human": q("SELECT COUNT(DISTINCT candidate_id) FROM evaluations WHERE evaluateur NOT LIKE 'IA%'"),
             "excellent": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND mention='Excellent'"),
             "bon": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND mention='Bon'"),
             "moyen": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND mention='Moyen'"),
             "non_retenu": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND mention='Non retenu'"),
-            "by_specialty": [dict(r) for r in c.execute("SELECT specialty, COUNT(*) as cnt FROM candidates WHERE hors_delai=0 GROUP BY specialty").fetchall()]
+            "verify": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND verification_required=1"),
+            "retenu_count": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND retenu=1"),
+            "by_specialty": [dict(r) for r in c.execute("SELECT specialty, COUNT(*) as cnt FROM candidates WHERE hors_delai=0 GROUP BY specialty").fetchall()],
+            "daily_stats": [dict(r) for r in c.execute("""
+                SELECT substr(first_date, 1, 10) as day, COUNT(*) as cnt 
+                FROM candidates 
+                WHERE first_date IS NOT NULL 
+                GROUP BY day 
+                ORDER BY day ASC 
+                LIMIT 30
+            """).fetchall()],
+            "score_distribution": [dict(r) for r in c.execute("""
+                SELECT (CAST(score_total/10 AS INT) * 10) as range, COUNT(*) as cnt 
+                FROM candidates 
+                WHERE score_total IS NOT NULL AND hors_delai=0
+                GROUP BY range 
+                ORDER BY range ASC
+            """).fetchall()],
+            "specialty_comparison": [dict(r) for r in c.execute("""
+                SELECT 
+                    specialty, 
+                    COUNT(*) as count,
+                    ROUND(AVG(CASE WHEN status='Complet' THEN 100.0 ELSE 0.0 END), 1) as complet_pct,
+                    ROUND(AVG(score_total), 1) as avg_score,
+                    SUM(CASE WHEN retenu=1 THEN 1 ELSE 0 END) as retenu_count
+                FROM candidates 
+                WHERE hors_delai=0
+                GROUP BY specialty
+                ORDER BY count DESC
+            """).fetchall()]
         }
         conn.close()
         return stats
@@ -178,6 +216,7 @@ class SqliteCandidateRepository(ICandidateRepository):
             score_total=d.get('score_total'),
             mention=d.get('mention'),
             retenu=bool(d.get('retenu', 0)),
+            verification_required=bool(d.get('verification_required', 0)),
             enriched=bool(d.get('enriched', 0)),
             hors_delai=bool(d.get('hors_delai', 0)),
             attachment_names=safe_json_load(d.get('attachment_names')),
@@ -199,8 +238,41 @@ class SqliteCandidateRepository(ICandidateRepository):
             score_total=float(d.get('score_total', 0)),
             mention=d.get('mention'),
             note=str(d.get('note', '')),
-            created_at=str(d.get('created_at', ''))
+            created_at=str(d.get('created_at', '')),
+            justif_niveau=str(d.get('justif_niveau', '') or ''),
+            justif_experience=str(d.get('justif_experience', '') or ''),
+            justif_motivation=str(d.get('justif_motivation', '') or ''),
+            justif_adequation=str(d.get('justif_adequation', '') or ''),
+            justif_dossier=str(d.get('justif_dossier', '') or ''),
+            justif_disponibilite=str(d.get('justif_disponibilite', '') or ''),
+            note_globale=str(d.get('note_globale', '') or '')
         )
+
+    def mark_retenu(self, candidate_id: int, retenu: bool) -> bool:
+        conn = self._get_connection()
+        conn.execute("UPDATE candidates SET retenu=? WHERE id=?", (int(retenu), candidate_id))
+        conn.commit()
+        conn.close()
+        return True
+
+    def get_quotas(self) -> list:
+        """Return per-specialty quota/selection stats."""
+        conn = self._get_connection()
+        rows = conn.execute("""
+            SELECT
+                specialty,
+                COUNT(*) as total_digital,
+                SUM(CASE WHEN retenu=1 THEN 1 ELSE 0 END) as retenu_digital,
+                SUM(CASE WHEN status='Complet' THEN 1 ELSE 0 END) as complet_count,
+                ROUND(AVG(score_total), 1) as avg_score,
+                MAX(score_total) as max_score
+            FROM candidates
+            WHERE hors_delai=0
+            GROUP BY specialty
+            ORDER BY total_digital DESC
+        """).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
 
 class SqliteAuditLogRepository(IAuditLogRepository):
     def __init__(self, db_path: str):

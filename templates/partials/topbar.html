@@ -3,7 +3,13 @@
     <div class="topbar-title" id="topbar-title" data-i18n="nav_dashboard">Tableau de bord</div>
     <div class="topbar-subtitle" id="topbar-sub" data-i18n="topbar_sub_dashboard">Vue d'ensemble des candidatures</div>
   </div>
-  <div class="topbar-right">
-    <button class="btn btn-out" onclick="exportCSV()" data-i18n="btn_export">⬇ Exporter CSV</button>
+  <div class="topbar-right" style="display:flex; gap:0.75rem;">
+    <button class="btn btn-glass" onclick="loadStats()" id="refresh-btn">
+      <i data-lucide="rotate-cw" style="width:16px;height:16px;"></i>
+    </button>
+    <button class="btn btn-glass" onclick="exportCSV()">
+      <i data-lucide="download" style="width:16px;height:16px;"></i>
+      <span data-i18n="btn_export">Exporter CSV</span>
+    </button>
   </div>
 </div>

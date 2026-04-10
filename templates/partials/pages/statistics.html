@@ -1,6 +1,89 @@
-<!-- ══════════ PAGE STATISTIQUES ══════════ -->
+<!-- ══════════ PAGE STATISTIQUES (Fantastic Version) ══════════ -->
 <div class="page" id="page-statistiques">
-  <div class="stats-detail-grid" id="stats-detail-content">
-    <div class="panel"><div class="panel-title">⏳ <span data-i18n="stats_loading">Chargement…</span></div></div>
+  
+  <div class="stats-grid" style="margin-bottom: 1.5rem; grid-template-columns: repeat(3, 1fr);">
+    <div class="stat-card" style="border-top: 4px solid var(--accent)">
+        <div class="stat-label">Candidats Uniques</div>
+        <div class="stat-val" id="s-total-stat">—</div>
+        <div class="stat-sub">Dont <span id="s-hors-delai-stat" style="color:var(--danger)">0</span> hors délai</div>
+    </div>
+    <div class="stat-card" style="border-top: 4px solid var(--primary)">
+        <div class="stat-label">État des Dossiers</div>
+        <div style="display:flex; justify-content:space-between; margin-top:0.5rem; font-size:0.85rem; font-weight:700">
+            <div><span style="color:var(--success)">■</span> <span id="s-comp-stat">0</span> Complets</div>
+            <div><span style="color:var(--warning)">■</span> <span id="s-partiel-stat">0</span> Partiels</div>
+            <div><span style="color:var(--text-dim)">■</span> <span id="s-vide-stat">0</span> Vides</div>
+        </div>
+    </div>
+    <div class="stat-card" style="border-top: 4px solid var(--success)">
+        <div class="stat-label">Vérifications & IA</div>
+        <div style="display:flex; justify-content:space-between; margin-top:0.5rem; font-size:0.85rem; font-weight:700">
+            <div><span style="color:var(--danger)">⚠️</span> <span id="st-verify-count">0</span> À vérifier</div>
+            <div>🤖 <span id="st-ia-count">0</span> Éval. IA</div>
+        </div>
+    </div>
   </div>
+
+  <div class="stats-grid">
+    <div class="stat-card" style="border-top: 4px solid var(--accent)">
+        <div class="stat-label">Moyenne Générale</div>
+        <div class="stat-val" id="st-avg-score">—</div>
+        <div class="stat-sub">Score sur 100 points</div>
+    </div>
+    <div class="stat-card" style="border-top: 4px solid var(--success)">
+        <div class="stat-label">Taux d'admission</div>
+        <div class="stat-val" id="st-admission-rate">—</div>
+        <div class="stat-sub">Scores ≥ 65/100</div>
+    </div>
+    <div class="stat-card" style="border-top: 4px solid #10B981">
+        <div class="stat-label">Retenus (Sélection)</div>
+        <div class="stat-val" id="st-retenu-count">—</div>
+        <div class="stat-sub" style="color:var(--success)">Validés par la commission</div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <!-- Chart: Candidate Funnel -->
+    <div class="widget">
+      <div class="widget-header">
+        <div class="widget-title"><i data-lucide="filter" style="color:var(--accent)"></i> <span>Entonnoir de sélection</span></div>
+      </div>
+      <div style="height: 350px;">
+        <canvas id="funnelChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart: Scores Heatmap -->
+    <div class="widget">
+      <div class="widget-header">
+        <div class="widget-title"><i data-lucide="layers" style="color:var(--accent-2)"></i> <span>Distribution des Notes</span></div>
+      </div>
+      <div style="height: 350px;">
+        <canvas id="scoreDistributionChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="widget" style="margin-top:2rem;">
+      <div class="widget-header">
+          <div class="widget-title"><i data-lucide="database" style="color:var(--success)"></i> <span>Comparatif par spécialité</span></div>
+      </div>
+      <div class="table-container" style="border:none; box-shadow:none;">
+          <table id="spec-comparison-table">
+            <thead>
+                <tr>
+                    <th style="width:40%">Spécialité</th>
+                    <th>Candidats</th>
+                    <th>Complétude %</th>
+                    <th>Retenus</th>
+                    <th>Score Moyen</th>
+                </tr>
+            </thead>
+            <tbody id="spec-stats-body">
+                <!-- Filled via JS -->
+            </tbody>
+          </table>
+      </div>
+  </div>
+
 </div>

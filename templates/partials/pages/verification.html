@@ -1,0 +1,30 @@
+<!-- ══════════ PAGE À VÉRIFIER ══════════ -->
+<div class="page" id="page-verification">
+  
+  <div class="widget" style="background:#fff3cd; border-color:#ffeeba; color:#856404; margin-bottom: 2rem;">
+    <div style="display:flex; align-items:center; gap: 1rem;">
+      <i data-lucide="alert-triangle" style="width:32px; height:32px;"></i>
+      <div>
+        <h3 style="font-weight:800; font-size:1.1rem; color:#856404; margin-bottom:0.25rem;">Action requise</h3>
+        <p style="font-size:0.85rem; opacity:0.9">Ces dossiers n'ont pas pu être lus intégralement par l'IA (textes illisibles ou documents scannés de mauvaise qualité). Veuillez ouvrir le dossier, vérifier les pièces et ajuster la notation manuellement dans l'onglet "Évaluation".</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:25%"><div class="th-content">Nom</div></th>
+          <th><div class="th-content">Filière</div></th>
+          <th><div class="th-content">Dossier</div></th>
+          <th><div class="th-content">Date</div></th>
+          <th style="text-align:right"><div class="th-content" style="justify-content:flex-end">Actions</div></th>
+        </tr>
+      </thead>
+      <tbody id="verifyTableBody">
+        <tr><td colspan="5" style="text-align:center;padding:5rem;"><div class="spinner"></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

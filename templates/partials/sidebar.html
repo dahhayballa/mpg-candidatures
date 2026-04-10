@@ -10,20 +10,29 @@
   <div class="sb-section" data-i18n="nav_section">Navigation</div>
   <ul class="sb-nav">
     <li><a onclick="gotoPage('dashboard')" id="nav-dashboard" class="active">
-      <span class="nav-icon">📊</span>
+      <i data-lucide="layout-dashboard" class="nav-icon"></i>
       <span data-i18n="nav_dashboard">Tableau de bord</span>
     </a></li>
     <li><a onclick="gotoPage('candidats')" id="nav-candidats">
-      <span class="nav-icon">👥</span>
+      <i data-lucide="users" class="nav-icon"></i>
       <span data-i18n="nav_candidats">Candidats</span>
       <span class="nav-badge" id="nb-count">—</span>
     </a></li>
     <li><a onclick="gotoPage('evaluation')" id="nav-evaluation">
-      <span class="nav-icon">⭐</span>
+      <i data-lucide="star" class="nav-icon"></i>
       <span data-i18n="nav_evaluation">Évaluation</span>
     </a></li>
+    <li><a onclick="gotoPage('verification')" id="nav-verification">
+      <i data-lucide="shield-alert" class="nav-icon"></i>
+      <span data-i18n="nav_verification">À vérifier</span>
+      <span class="nav-badge" id="nb-verify" style="display:none;background:var(--danger);color:white">0</span>
+    </a></li>
+    <li><a onclick="gotoPage('quotas')" id="nav-quotas">
+      <i data-lucide="target" class="nav-icon"></i>
+      <span data-i18n="nav_quotas">Quotas & Sélection</span>
+    </a></li>
     <li><a onclick="gotoPage('statistiques')" id="nav-statistiques">
-      <span class="nav-icon">📈</span>
+      <i data-lucide="bar-chart-3" class="nav-icon"></i>
       <span data-i18n="nav_statistiques">Statistiques</span>
     </a></li>
   </ul>
@@ -32,10 +41,6 @@
     <div class="lang-toggle">
       <button class="lang-btn active" id="lang-fr" onclick="setLang('fr')">FR</button>
       <button class="lang-btn" id="lang-ar" onclick="setLang('ar')">عر</button>
-    </div>
-    <div class="sb-deadline" id="sb-deadline">
-      ⏰ <span data-i18n="deadline_label">Date limite :</span><br>
-      <strong>31/03/2026 à 14h00</strong>
     </div>
   </div>
 </aside>

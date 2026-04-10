@@ -234,6 +234,7 @@ def ensure_enrich_columns(conn):
     existing = [r[1] for r in c.execute("PRAGMA table_info(candidates)").fetchall()]
     new_cols = [
         ("enriched",       "INTEGER DEFAULT 0"),
+        ("verification_required", "INTEGER DEFAULT 0"),
         ("email_body_full","TEXT DEFAULT ''"),
         ("att_text",       "TEXT DEFAULT ''"),
     ]
@@ -348,21 +349,33 @@ def enrich():
             status   = compute_status(docs)
             score_d  = compute_score_dossier(docs)
 
+            # Détection du besoin de vérification humaine
+            needs_verify = 0
+            # Heuristique 1 : Pas de spécialité trouvée
+            if specialty == "Non spécifié":
+                needs_verify = 1
+            # Heuristique 2 : Incomplet alors qu'il y a des fichiers (ambiguité)
+            if status == "Incomplet" and len(acc["filenames"]) > 0:
+                needs_verify = 1
+            # Heuristique 3 : Aucun document reconnu parmi les 4 types de base
+            if status == "Vide" and len(acc["filenames"]) > 1:
+                needs_verify = 1
+
             # Préserver spécialité si déjà détectée
             if specialty == "Non spécifié" and cand["specialty"] != "Non spécifié":
                 specialty = cand["specialty"]
 
-            conn.execute("""
                 UPDATE candidates SET
                     email_body_full = ?, att_text = ?,
                     has_cv = ?, has_motivation = ?, has_id = ?, has_diplomas = ?,
-                    status = ?, score_dossier = ?, specialty = ?, enriched = 1
+                    status = ?, score_dossier = ?, specialty = ?, 
+                    verification_required = ?, enriched = 1
                 WHERE email_addr = ?
             """, (
                 full_body[:8000], full_att[:8000],
                 int(docs["has_cv"]), int(docs["has_motivation"]), 
                 int(docs["has_id"]), int(docs["has_diplomas"]),
-                status, score_d, specialty, email_addr
+                status, score_d, specialty, needs_verify, email_addr
             ))
             conn.commit()
             processed += 1
