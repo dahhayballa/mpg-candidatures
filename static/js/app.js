@@ -8,6 +8,8 @@ const TRANSLATIONS = {
     nav_dashboard: "Tableau de bord",
     nav_candidats: "Candidats",
     nav_evaluation: "Évaluation",
+    nav_verification: "À vérifier",
+    nav_quotas: "Quotas & Sélection",
     nav_statistiques: "Statistiques",
     deadline_label: "Date limite :",
     btn_export: "⬇ Exporter CSV",
@@ -66,6 +68,8 @@ const TRANSLATIONS = {
     nav_dashboard: "لوحة التحكم",
     nav_candidats: "المترشحون",
     nav_evaluation: "التقييم",
+    nav_verification: "للمراجعة",
+    nav_quotas: "الحصص والاختيار",
     nav_statistiques: "الإحصائيات",
     deadline_label: "الموعد النهائي :",
     btn_export: "⬇ تصدير CSV",
@@ -278,17 +282,16 @@ async function loadStats() {
   const d = await r.json();
 
   setText('s-total', fmt(d.total));
-  setText('s-complet', fmt(d.complet));
+  setText('s-elite', fmt(d.excellent || 0));
+  setText('s-good', fmt(d.bon || 0));
+  
+  // d.non_retenu already includes Vides and Partiels that got a low score.
+  setText('s-rejected', fmt((d.non_retenu || 0) + (d.moyen || 0)));
 
   // Distinguish evaluations
   const totalEval = (d.eval_ia || 0) + (d.eval_human || 0);
   setText('s-eval', fmt(totalEval));
-  const evalSub = document.getElementById('s-eval-sub');
-  if (evalSub) {
-    evalSub.innerHTML = `<i data-lucide="cpu" style="width:10px;height:10px;"></i> ${fmt(d.eval_ia || 0)} IA • <i data-lucide="user" style="width:10px;height:10px;"></i> ${fmt(d.eval_human || 0)} Manuel`;
-  }
 
-  setText('s-verify', d.verify || 0);
   setText('nb-count', fmt(d.total || 0));
 
   const nvBadge = document.getElementById('nb-verify');
@@ -453,13 +456,20 @@ async function loadTable(reset = true) {
   }
 
   tbody.innerHTML = d.data.map(c => `
-    <tr onclick="selectCandidat(${c.id})" style="cursor:pointer">
+    <tr onclick="selectCandidat(${c.id})" style="cursor:pointer; ${c.retenu ? 'background:rgba(16, 185, 129, 0.05)' : ''}">
       <td>
-        <div style="font-weight:800; color:var(--primary);">${esc(c.name)}</div>
+        <div style="font-weight:800; color:var(--primary); display:flex; align-items:center; gap:0.5rem">
+          ${c.retenu ? '<i data-lucide="check-circle" style="width:14px;height:14px;color:var(--success)"></i> ' : ''}
+          ${esc(c.name)}
+        </div>
         <div style="font-size:0.7rem; color:var(--text-dim);">${esc(c.email_addr)}</div>
       </td>
-      <td>${esc(c.specialty || '—')}</td>
-      <td><div style="display:flex;gap:4px;">${['cv', 'motivation', 'id', 'diplomas'].map(k => `<span style="opacity:${c['has_' + k] ? 1 : 0.1}">●</span>`).join('')}</div></td>
+      <td><span class="badge" style="background:#f1f5f9; color:#475569">${esc(c.specialty || '—')}</span></td>
+      <td>
+        <div class="dossier-progress" title="CV, Lettre, ID, Diplômes">
+            ${['has_cv', 'has_motivation', 'has_id', 'has_diplomas'].map(k => `<div class="dossier-pip ${c[k] ? 'filled' : ''}"></div>`).join('')}
+        </div>
+      </td>
       <td>${statusBadge(c.status)}${c.verification_required ? ' <span class="badge" style="background:var(--danger);color:white">⚠️</span>' : ''}</td>
       <td style="text-align:center;font-weight:800;color:${scoreColor(c.score_total)}">${c.score_total || '—'}</td>
       <td>${mentionBadge(c.mention)}</td>
@@ -538,23 +548,51 @@ async function loadQuotasTable() {
   const rStats = await fetch('/api/quotas');
   const quotas = await rStats.json();
 
+  const targetQuotas = {
+    'Soudure': 20,
+    'Tuyauterie': 30,
+    'Construction métallique': 20,
+    'Sablage - Peinture': 20,
+    'Echafaudage': 20,
+    'HSE': 40
+  };
+
   const qs = document.getElementById('quotas-stats-grid');
   if (qs) {
-    qs.innerHTML = quotas.map(q => `
-            <div class="stat-card" style="border-top: 4px solid var(--accent); padding:1.5rem">
+    qs.innerHTML = quotas.map(q => {
+        let specTarget = targetQuotas[q.specialty] || 0;
+        let pct = specTarget ? Math.min(100, Math.round((q.retenu_digital / specTarget) * 100)) : 0;
+        let isFull = q.retenu_digital >= specTarget && specTarget > 0;
+        let progressColor = isFull ? 'var(--success)' : 'var(--warning)';
+        let glowShadow = isFull ? '0 0 10px rgba(16, 185, 129, 0.4)' : '0 0 10px rgba(245, 158, 11, 0.4)';
+
+        return `
+            <div class="stat-card" style="border-top: 4px solid ${progressColor}; padding:1.5rem">
                 <div style="font-size:0.75rem; font-weight:800; color:var(--text-dim); margin-bottom:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis" title="${esc(q.specialty)}">${esc(q.specialty || 'Non spécifié')}</div>
+                
+                <div style="margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                        <span style="font-size:0.75rem; font-weight:800; color:${progressColor}">${q.retenu_digital} <span style="color:var(--text-dim)">/ ${specTarget}</span></span>
+                        <span style="font-size:0.75rem; font-weight:800; color:var(--text-dim)">${pct}%</span>
+                    </div>
+                    <div style="width:100%; height:8px; background:rgba(0,0,0,0.05); border-radius:4px; overflow:hidden;">
+                        <div style="width:${pct}%; height:100%; background:${progressColor}; box-shadow:${glowShadow}; border-radius:4px; transition:width 0.4s ease;"></div>
+                    </div>
+                </div>
+
                 <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                     <div>
-                        <div style="font-size:2rem; font-weight:900; color:var(--primary); line-height:1">${q.retenu_digital}</div>
-                        <div style="font-size:0.7rem; font-weight:700; color:var(--success); margin-top:0.2rem">Retenus / ${q.total_digital}</div>
+                        <div style="font-size:1.5rem; font-weight:900; color:var(--primary); line-height:1">${q.total_digital}</div>
+                        <div style="font-size:0.7rem; font-weight:700; color:var(--text-dim); margin-top:0.2rem">Total dossiers</div>
                     </div>
                     <div style="text-align:right">
-                        <div style="font-size:1.25rem; font-weight:800; color:var(--text-muted); line-height:1">${q.complet_count}</div>
+                        <div style="font-size:1.25rem; font-weight:800; color:var(--accent); line-height:1">${q.complet_count}</div>
                         <div style="font-size:0.7rem; color:var(--text-dim); margin-top:0.2rem">Complets</div>
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+    }).join('');
   }
 
   const tbody = document.getElementById('quotasTableBody');
@@ -642,6 +680,16 @@ async function selectCandidat(id) {
   setText('ev-name', c.name);
   setText('ev-email', c.email_addr);
 
+  // Update AI Synthesis Note
+  const jg = document.getElementById('j-globale');
+  const boxGlobale = document.getElementById('ev-ai-synthesis');
+  if (c.note_globale) {
+    if (jg) jg.textContent = c.note_globale;
+    if (boxGlobale) boxGlobale.style.display = 'block';
+  } else {
+    if (boxGlobale) boxGlobale.style.display = 'none';
+  }
+
   // Update Evaluator Badge
   const b = document.getElementById('ev-evaluator-badge');
   if (b) {
@@ -719,22 +767,68 @@ async function selectCandidat(id) {
     `).join('');
   }
 
-  // Load data from latest evaluation if exists
-  const lastEval = c.evaluations && c.evaluations.length > 0 ? c.evaluations[c.evaluations.length - 1] : {};
+  // Load data from latest evaluation if exists (or DB natively for AI v3)
+  const lastEval = c.evaluations && c.evaluations.length > 0 ? c.evaluations[c.evaluations.length - 1] : c;
 
   ['niveau', 'experience', 'motivation', 'adequation', 'dossier', 'disponibilite'].forEach(k => {
-    const v = lastEval[`score_${k}`] ?? 0, sl = document.getElementById(`sl-${k}`), vl = document.getElementById(`v-${k}`);
+    const v = c[`score_${k}`] !== null && c[`score_${k}`] !== undefined ? c[`score_${k}`] : (lastEval[`score_${k}`] || 0);
+    const sl = document.getElementById(`sl-${k}`), vl = document.getElementById(`v-${k}`);
     if (sl) sl.value = v; if (vl) vl.textContent = v;
+    
     const justifEl = document.getElementById(`j-${k}`);
     if (justifEl) {
-      if (lastEval[`justif_${k}`]) justifEl.innerHTML = `<span style="font-weight:700">Justification:</span> ${esc(lastEval[`justif_${k}`])}`;
+      const justifText = c[`justif_${k}`] || lastEval[`justif_${k}`];
+      if (justifText) justifEl.innerHTML = `<span style="font-weight:700">IA:</span> ${esc(justifText)}`;
       else justifEl.innerHTML = '';
     }
   });
 
   const nf = document.getElementById('note-field');
-  const ng = lastEval.note_globale ? `🤖[IA]: ${lastEval.note_globale}\n\n` : '';
+  const actualNoteGlobale = c.note_globale || lastEval.note_globale;
+  const ng = actualNoteGlobale ? `🤖[IA]: ${actualNoteGlobale}\n\n` : '';
   if (nf) nf.value = ng + (lastEval.note || '');
+
+  // Render Radar Chart
+  if (window.charts && window.charts.radar) window.charts.radar.destroy();
+  const ctxR = document.getElementById('evalRadarChart');
+  if (ctxR) {
+    window.charts = window.charts || {};
+    window.charts.radar = new Chart(ctxR, {
+      type: 'radar',
+      data: {
+        labels: ['Niveau', 'Expérience', 'Motivation', 'Adéquation', 'Dossier+Dispo'],
+        datasets: [{
+          label: 'Profil Candidat',
+          data: [
+            c.score_niveau !== null ? c.score_niveau : (lastEval.score_niveau || 0),
+            c.score_experience !== null ? c.score_experience : (lastEval.score_experience || 0),
+            c.score_motivation !== null ? c.score_motivation : (lastEval.score_motivation || 0),
+            c.score_adequation !== null ? c.score_adequation : (lastEval.score_adequation || 0),
+            ((c.score_dossier !== null ? c.score_dossier : (lastEval.score_dossier || 0)) + (c.score_disponibilite !== null ? c.score_disponibilite : (lastEval.score_disponibilite || 0))) * 1.66
+          ],
+          backgroundColor: 'rgba(99, 102, 241, 0.2)',
+          borderColor: '#6366F1',
+          pointBackgroundColor: '#10B981',
+          pointBorderColor: '#fff',
+          pointHoverBackgroundColor: '#fff',
+          pointHoverBorderColor: '#10B981'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          r: {
+            angleLines: { color: 'rgba(0,0,0,0.1)' },
+            grid: { color: 'rgba(0,0,0,0.1)' },
+            pointLabels: { font: { size: 10, family: 'Outfit', weight: '700' }, color: '#475569' },
+            ticks: { display: false, max: 25, min: 0 }
+          }
+        },
+        plugins: { legend: { display: false } }
+      }
+    });
+  }
 
   if (c.retenu) {
     const b = document.getElementById('ev-evaluator-badge');
@@ -821,14 +915,14 @@ function statusBadge(s) {
 }
 function mentionBadge(m) {
   if (!m) return `<span class="badge">${t('badge_pending')}</span>`;
-  const map = { Excellent: 'b-excellent', Bon: 'b-bon', Moyen: 'b-moyen', 'Non retenu': 'b-nonretenu' };
-  return `<span class="badge ${map[m] || ''}">${t('badge_' + m.toLowerCase().replace(' ', '_'))}</span>`;
+  const map = { Excellent: 'badge-excellent', Bon: 'badge-bon', Moyen: 'badge-moyen', 'Non retenu': 'badge-non-retenu' };
+  return `<span class="badge ${map[m] || ''}">${esc(m)}</span>`;
 }
 function getMention(s) {
-  if (s >= 80) return { label: t('badge_excellent'), cls: 'b-excellent' };
-  if (s >= 65) return { label: t('badge_bon'), cls: 'b-bon' };
-  if (s >= 50) return { label: t('badge_moyen'), cls: 'b-moyen' };
-  return { label: t('badge_non_retenu'), cls: 'b-nonretenu' };
+  if (s >= 80) return { label: t('badge_excellent'), cls: 'badge-excellent' };
+  if (s >= 65) return { label: t('badge_bon'), cls: 'badge-bon' };
+  if (s >= 50) return { label: t('badge_moyen'), cls: 'badge-moyen' };
+  return { label: t('badge_non_retenu'), cls: 'badge-non-retenu' };
 }
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms) } }
 function exportCSV() { window.location = '/api/export/csv' }

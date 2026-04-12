@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: mpg-candidatures
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_PORT
+        value: 10000
+      - key: DB_URL
+        fromDatabase:
+          name: mpg-supabase
+          property: connectionString

@@ -64,6 +64,19 @@ class Candidate:
     subjects: List[str] = field(default_factory=list)
     body_preview: str = ""
     folder_path: str = ""
+    score_niveau: Optional[float] = None
+    score_experience: Optional[float] = None
+    score_motivation: Optional[float] = None
+    score_adequation: Optional[float] = None
+    score_dossier: Optional[float] = None
+    score_disponibilite: Optional[float] = None
+    justif_niveau: str = ""
+    justif_experience: str = ""
+    justif_motivation: str = ""
+    justif_adequation: str = ""
+    justif_dossier: str = ""
+    justif_disponibilite: str = ""
+    note_globale: str = ""
     evaluations: List[Evaluation] = field(default_factory=list)
 
     def update_status(self) -> None:

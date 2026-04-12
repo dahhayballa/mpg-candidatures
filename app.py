@@ -18,6 +18,9 @@ from core.use_cases.evaluate_candidate import EvaluateCandidateUseCase
 from core.use_cases.retenir_candidate import RetenirCandidateUseCase
 
 app = Flask(__name__)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 DEADLINE = "2026-03-31 14:00"
 
 # --- Dependency Injection ---
@@ -130,6 +133,23 @@ def export_csv() -> Response:
     
     return Response("\ufeff" + out.getvalue(), mimetype="text/csv",
                     headers={"Content-Disposition": "attachment;filename=candidatures_final.csv"})
+
+@app.route("/api/export/attente")
+def export_attente() -> Response:
+    import subprocess
+    import glob
+    
+    # Run the waiting list script
+    script_path = os.path.join(os.path.dirname(__file__), "liste_attente.py")
+    subprocess.run([sys.executable, script_path], cwd=os.path.dirname(__file__))
+    
+    # Find the newly generated file
+    files = glob.glob(os.path.join(os.path.dirname(__file__), "Liste_Attente_MPG_FQ2026_*.xlsx"))
+    if not files:
+        return jsonify({"error": "Failed to generate file"}), 500
+    
+    latest_file = max(files, key=os.path.getctime)
+    return send_from_directory(os.path.dirname(latest_file), os.path.basename(latest_file), as_attachment=True)
 
 if __name__ == "__main__":
     print(f"🌐 Running Clean Arch Server : http://localhost:{config.FLASK_PORT}")

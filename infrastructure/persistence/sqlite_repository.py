@@ -152,7 +152,7 @@ class SqliteCandidateRepository(ICandidateRepository):
             "complet": q("SELECT COUNT(*) FROM candidates WHERE status='Complet' AND hors_delai=0"),
             "partiel": q("SELECT COUNT(*) FROM candidates WHERE status='Partiel' AND hors_delai=0"),
             "vide": q("SELECT COUNT(*) FROM candidates WHERE status='Vide' AND hors_delai=0"),
-            "eval_ia":    q("SELECT COUNT(DISTINCT candidate_id) FROM evaluations WHERE evaluateur LIKE 'IA%'"),
+            "eval_ia":    q("SELECT COUNT(*) FROM candidates WHERE ia_scored=1 AND hors_delai=0"),
             "eval_human": q("SELECT COUNT(DISTINCT candidate_id) FROM evaluations WHERE evaluateur NOT LIKE 'IA%'"),
             "excellent": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND mention='Excellent'"),
             "bon": q("SELECT COUNT(*) FROM candidates WHERE hors_delai=0 AND mention='Bon'"),
@@ -222,7 +222,20 @@ class SqliteCandidateRepository(ICandidateRepository):
             attachment_names=safe_json_load(d.get('attachment_names')),
             subjects=safe_json_load(d.get('subjects')),
             body_preview=str(d.get('body_preview', '')),
-            folder_path=str(d.get('folder_path', ''))
+            folder_path=str(d.get('folder_path', '')),
+            score_niveau=d.get('score_niveau'),
+            score_experience=d.get('score_experience'),
+            score_motivation=d.get('score_motivation'),
+            score_adequation=d.get('score_adequation'),
+            score_dossier=d.get('score_dossier'),
+            score_disponibilite=d.get('score_disponibilite'),
+            justif_niveau=str(d.get('justif_niveau', '') or ''),
+            justif_experience=str(d.get('justif_experience', '') or ''),
+            justif_motivation=str(d.get('justif_motivation', '') or ''),
+            justif_adequation=str(d.get('justif_adequation', '') or ''),
+            justif_dossier=str(d.get('justif_dossier', '') or ''),
+            justif_disponibilite=str(d.get('justif_disponibilite', '') or ''),
+            note_globale=str(d.get('note_globale', '') or '')
         )
 
     def _row_to_evaluation(self, row: sqlite3.Row) -> Evaluation:

@@ -25,6 +25,10 @@
             <!-- Dynamic info rows -->
         </div>
 
+        <div id="radar-wrapper" style="margin-top:1.5rem; text-align:center; position:relative; height: 280px; width: 100%;">
+            <canvas id="evalRadarChart" style="margin:0 auto;"></canvas>
+        </div>
+
         <!-- WARNING MANQUANT (New) -->
         <div id="ev-missing-warning" style="display:none; margin-top:1.5rem; background:#fff3cd; border:1px solid #ffeeba; border-radius:12px; padding:1rem; color:#856404; font-size:0.8rem;">
             <div style="font-weight:800; margin-bottom:0.25rem; display:flex; align-items:center; gap:0.5rem;">
@@ -68,6 +72,15 @@
         <div class="widget-header" style="margin-bottom:1.5rem;">
             <div class="widget-title"><i data-lucide="award" style="color:var(--accent)"></i> <span data-i18n="scoring_grid">Grille d'évaluation</span></div>
             <div style="font-size:0.75rem; font-weight:700; background:var(--accent-light); color:var(--accent); padding:0.2rem 0.6rem; border-radius:20px;">100 pts</div>
+        </div>
+
+        <div id="ev-ai-synthesis" class="glass-card" style="margin-bottom:2rem; padding:1.25rem; background:rgba(99, 102, 241, 0.05); border:1px solid rgba(99, 102, 241, 0.2); border-radius:1rem; display:none;">
+            <div style="font-size:0.75rem; font-weight:800; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem;">
+                <i data-lucide="sparkles" style="width:16px;height:16px;"></i> Synthèse de l'IA
+            </div>
+            <div id="j-globale" style="font-size:0.9rem; color:var(--text); line-height:1.5; font-style:italic;">
+                <!-- AI Global Note -->
+            </div>
         </div>
 
         <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;">

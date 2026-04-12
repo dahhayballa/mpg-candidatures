@@ -1,39 +1,39 @@
 <!-- ══════════ PAGE DASHBOARD (Fantastic Version) ══════════ -->
 <div class="page active" id="page-dashboard">
   
-  <!-- ROW 1: MEGA CARDS -->
-  <div class="stats-grid">
+  <!-- ROW 1: MEGA CARDS (Command Center View) -->
+  <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+    
     <div class="stat-card card-indigo">
       <div class="stat-watermark"><i data-lucide="users"></i></div>
-      <div class="stat-icon" style="background:var(--accent);color:white;opacity:1"><i data-lucide="users"></i></div>
-      <div class="stat-label" data-i18n="stat_total">Candidats recevables</div>
+      <div class="stat-icon" style="background:var(--primary);color:white;opacity:1"><i data-lucide="users"></i></div>
+      <div class="stat-label">Total Dossiers</div>
       <div class="stat-val" id="s-total">0</div>
-      <div class="stat-sub"><i data-lucide="check-circle-2" style="width:12px;height:12px;vertical-align:middle"></i> Dossiers officiels</div>
+      <div class="stat-sub"><i data-lucide="check-circle-2" style="width:12px;height:12px;vertical-align:middle"></i> Candidats recevables</div>
     </div>
     
     <div class="stat-card card-emerald">
-      <div class="stat-watermark"><i data-lucide="file-check"></i></div>
-      <div class="stat-icon" style="background:var(--success);color:white;opacity:1"><i data-lucide="check-square"></i></div>
-      <div class="stat-label" data-i18n="stat_complet">Dossiers complets</div>
-      <div class="stat-val" id="s-complet">0</div>
-      <div class="stat-sub"><i data-lucide="file-check" style="width:12px;height:12px;vertical-align:middle"></i> 100% des pièces fournies</div>
+      <div class="stat-watermark"><i data-lucide="award"></i></div>
+      <div class="stat-icon" style="background:var(--success);color:white;opacity:1"><i data-lucide="shield-check"></i></div>
+      <div class="stat-label">النخبة (Excellent)</div>
+      <div class="stat-val" id="s-elite">0</div>
+      <div class="stat-sub" style="color:var(--success)"><i data-lucide="trending-up" style="width:12px;height:12px;vertical-align:middle"></i> Profils hautement qualifiés</div>
     </div>
 
-    <div class="stat-card card-amber">
-        <div class="stat-watermark"><i data-lucide="star"></i></div>
-        <div class="stat-icon" style="background:var(--accent-2);color:white;opacity:1"><i data-lucide="award"></i></div>
-        <div class="stat-label" data-i18n="stat_eval">Évaluations</div>
-        <div class="stat-val" id="s-eval">0</div>
-        <div class="stat-sub" id="s-eval-sub">Notation Claude iA</div>
+    <div class="stat-card" style="border-top: 5px solid #3B82F6;">
+        <div class="stat-watermark"><i data-lucide="thumbs-up"></i></div>
+        <div class="stat-icon" style="background:#3B82F6;color:white;opacity:1"><i data-lucide="check"></i></div>
+        <div class="stat-label">الجيدون (Bon)</div>
+        <div class="stat-val" id="s-good" style="color:#3B82F6">0</div>
+        <div class="stat-sub">Candidats admissibles</div>
     </div>
 
-    <div class="stat-card card-crimson" style="border: 2px solid var(--danger)">
-        <div class="stat-watermark"><i data-lucide="alert-triangle"></i></div>
-        <div class="card-pulse"></div>
-        <div class="stat-icon" style="background:var(--danger);color:white;opacity:0.8"><i data-lucide="alert-circle"></i></div>
-        <div class="stat-label" data-i18n="verify_required">À vérifier</div>
-        <div class="stat-val" id="s-verify" style="color:var(--danger)">0</div>
-        <div class="stat-sub" data-i18n="needs_verify">Action manuelle requise</div>
+    <div class="stat-card card-crimson">
+        <div class="stat-watermark"><i data-lucide="x-circle"></i></div>
+        <div class="stat-icon" style="background:var(--danger);color:white;opacity:0.8"><i data-lucide="slash"></i></div>
+        <div class="stat-label">المستبعدون</div>
+        <div class="stat-val" id="s-rejected" style="color:var(--danger)">0</div>
+        <div class="stat-sub" style="color:var(--danger)">Rejet automatique (incomplet/spam)</div>
     </div>
   </div>
 
